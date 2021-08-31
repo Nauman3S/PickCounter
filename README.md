@@ -94,7 +94,7 @@ You should have Arduino IDE Installed
 
 ## Demo Video
 
-- [PickCounter](https://youtu.be/y3RfxgQILcE) - Mesh Tracker Demo Video
+- [PickCounter](https://youtu.be/y3RfxgQILcE) - PickCounter ESP32 and Python Script Demo Video
 
 ## ✍️ Authors <a name = "authors"></a>
 
