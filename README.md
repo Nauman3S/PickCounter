@@ -93,7 +93,8 @@ You should have Arduino IDE Installed
 - [Python](https://www.python.org/downloads/) - Programming Language
 
 ## Demo Video
-    - [MeshTracker](https://youtu.be/ymA-GVuNWVc) - Mesh Tracker Demo Video
+
+- [PickCounter](https://youtu.be/y3RfxgQILcE) - Mesh Tracker Demo Video
 
 ## ✍️ Authors <a name = "authors"></a>
 
