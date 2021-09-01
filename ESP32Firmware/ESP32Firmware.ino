@@ -53,15 +53,18 @@ void processOrderAndSendResponse(uint8_t n)
 
 void setup()
 {
+    Serial.begin(115200);
     pinMode(BUILTIN_LED, OUTPUT); // Initialize the BUILTIN_LED pin as an output
-    //setupADC();
+    
+    setup_wifi();
 
     Serial.print("Device ID: ");
     //MAC = String(WiFi.macAddress());
+    
     Serial.println(getMacAddress());
     setMACID(getMacAddress());
-    Serial.begin(115200);
-    setup_wifi();
+    
+    
     client.setServer(mqtt_server, 1883);
     client.setCallback(callback);
 }
@@ -84,6 +87,7 @@ void loop()
     else if(NewOrderReceived() == 2){
        Serial.println("Wrong Device ID");
        getOrderValues();//failed, wrong mac
+       processOrderAndSendResponse(2);
     }
 
     unsigned long now = millis();
