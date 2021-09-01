@@ -69,11 +69,12 @@ client.subscribe("pickcounter/orderstatus")
 
 
 client.loop_start()
-
+devID=""
 while 1:
+    devID=input("Enter Device ID: ")
     ledColor=input("Enter LED Color to send: ")
     valueV=input("Enter Value to send: ")
-    client.publish('pickcounter/orders',str(ledColor)+','+str(valueV))
+    client.publish('pickcounter/orders',str(ledColor)+','+str(valueV)+','+str(devID))
     print("Order Sent!")
     time.sleep(1)
     

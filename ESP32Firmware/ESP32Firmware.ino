@@ -1,4 +1,5 @@
 
+
 #include "WiFiCreds.h"
 #include <PubSubClient.h>
 #include "SStack.h"
@@ -55,8 +56,10 @@ void setup()
     pinMode(BUILTIN_LED, OUTPUT); // Initialize the BUILTIN_LED pin as an output
     //setupADC();
 
-    Serial.print("WiFi ST Mac: ");
-    MAC = String(WiFi.macAddress());
+    Serial.print("Device ID: ");
+    //MAC = String(WiFi.macAddress());
+    Serial.println(getMacAddress());
+    setMACID(getMacAddress());
     Serial.begin(115200);
     setup_wifi();
     client.setServer(mqtt_server, 1883);
@@ -72,11 +75,15 @@ void loop()
     }
     client.loop();
 
-    if (NewOrderReceived() == true)
+    if (NewOrderReceived() == 1)
     {   Serial.println("New Order Received.");
         Serial.print("LEDColor,Value = ");
         Serial.println(getOrderValues());
         processOrderAndSendResponse(0);//0=completed, 1=timeout, 2=failed
+    }
+    else if(NewOrderReceived() == 2){
+       Serial.println("Wrong Device ID");
+       getOrderValues();//failed, wrong mac
     }
 
     unsigned long now = millis();

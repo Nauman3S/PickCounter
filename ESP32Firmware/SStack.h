@@ -2,7 +2,7 @@ const char *srvVal = "broker.hivemq.com";
 
 String randomString(String appendV);
 String StringSeparator(String data, char separator, int index);
-
+String getMacAddress();
 String StringSeparator(String data, char separator, int index)
 {
 
@@ -36,4 +36,14 @@ String randomString(String appendV)
   v = v + appendV;
   //Serial.println(v);
   return v;
+}
+
+String getMacAddress(){
+  String NodeID;
+  NodeID=String(WiFi.macAddress());
+  NodeID=StringSeparator(NodeID,':',0)+StringSeparator(NodeID,':',1)+StringSeparator(NodeID,':',2)
+            +StringSeparator(NodeID,':',3)+
+            StringSeparator(NodeID,':',4)+StringSeparator(NodeID,':',4)+StringSeparator(NodeID,':',5);
+
+  return NodeID;
 }

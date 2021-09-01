@@ -1,5 +1,6 @@
 
 uint8_t MQTTstatus = 0;
+void getMacID(String MAC);
 uint8_t mqttStatus()
 {
     return MQTTstatus;
@@ -9,14 +10,21 @@ uint8_t mqttStatus()
 const char *ordersTopic = "pickcounter/orders"; //send anything to this topic and it will reset the MDB bus
 int orderReceived = 0;
 String orderValues[2] = {"", ""};
+String DevID="";
+void setMACID(String MAC){
+    DevID=MAC;
+}
 uint8_t NewOrderReceived()
 {
     if (orderReceived == 1)
     {
         return 1;
     }
-    else
+    else if(orderReceived==2)
     {
+        return 2;
+    }
+    else{
         return 0;
     }
 }
@@ -41,13 +49,19 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         String LEDColor = StringSeparator(payloadV, ',', 0);
         String Value = StringSeparator(payloadV, ',', 1);
+        String mID=StringSeparator(payloadV, ',', 2);
         // Serial.print("LEDColor=");
         // Serial.println(LEDColor);
         // Serial.print("Value=");
         // Serial.println(Value);
+        if(mID==DevID){
         orderReceived = 1;
         orderValues[0] = LEDColor;
         orderValues[1] = Value;
+        }
+        else{
+            orderReceived=2;
+        }
     }
 
     // Switch on the LED if an 1 was received as first character
