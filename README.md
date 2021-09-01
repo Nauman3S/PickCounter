@@ -74,6 +74,8 @@ You should have Arduino IDE Installed
   2.  Select the correct port from Tools->Port
   3.  Then open ESP32Firmware.ino file, and open WiFiCreds.h tab on line number 4 and 5, put your WiFi creds
   4.  Upload the Code to your ESP32 Wrover Module Gateway Board
+  5.  Open the serial monitor and press reset button of your ESP32.
+  6.  You will get Device ID on serial monitor, note it down as you will be using it in Python Script to send data.
 
 
 
@@ -86,7 +88,7 @@ You should have Arduino IDE Installed
 ### Python Script running
 
 - Run the python script using ```python3 Script.py```
-- The script will start running, you can enter the color and the values which will be instantly sent to the ESP32 and the ESP32 will send back the response.
+- The script will start running, you can enter the device ID, color and the values which will be instantly sent to the ESP32 and the ESP32 will send back the response.
 ## ⛏️ Built Using <a name = "built_using"></a>
 
 - [Arduino](https://www.arduino.cc/) - IDE

@@ -6,7 +6,7 @@
 
 #define BUILTIN_LED 2
 
-const char *mqtt_server = "broker.hivemq.com";
+const char *mqtt_server = "smart-pilot.cloudmqtt.com";
 String MAC = "";
 WiFiClient espClient;
 PubSubClient client(espClient);

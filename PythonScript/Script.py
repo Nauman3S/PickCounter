@@ -63,8 +63,8 @@ for i in range(0,6):
 client = mqtt.Client("C1"+clientID_prefix)
 #client.on_connect = on_connect
 client.on_message = on_message
-
-client.connect("broker.hivemq.com", 1883, 60)
+client.username_pw_set('bbniqtdq','D87AAz6nsCdN')
+client.connect("smart-pilot.cloudmqtt.com", 1883, 60)
 client.subscribe("pickcounter/orderstatus")
 
 

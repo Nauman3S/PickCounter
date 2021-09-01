@@ -92,7 +92,7 @@ void reconnect()
         String clientId = "ESP8266Client-";
         clientId += String(random(0xffff), HEX);
         // Attempt to connect
-        if (client.connect(clientId.c_str()))
+        if (client.connect(clientId.c_str(),"bbniqtdq","D87AAz6nsCdN"))
         {
             Serial.println("connected");
 
