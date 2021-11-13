@@ -25,6 +25,7 @@
 - [Getting Started](#getting_started)
 - [Installing](#installing)
 - [PythonScript Configuration](#pythonscript)
+- [GoogleSheets](#gs)
 - [Built Using](#built_using)
 - [Authors](#authors)
 
@@ -85,10 +86,16 @@ You should have Arduino IDE Installed
 1.  Download and install Python3 from official website: https://www.python.org/downloads/
 2.  Go in the PythonScript folder and open the terminal
 3.  Execute ```pip3 install -r requirements.txt```
-### Python Script running
+### Running Python Script
 
 - Run the python script using ```python3 Script.py```
-- The script will start running, you can enter the device ID, color and the values which will be instantly sent to the ESP32 and the ESP32 will send back the response.
+- The script will start running. You can add orders to the Spreadsheet and they will be instantly dispached to the ESP32 devices. Once the ESP32 completes an order, it will be removed form the sheet and the next order will be sent.
+
+## ⛏️ Googlesheets <a name = "gs"></a>
+
+- [Calib](https://docs.google.com/spreadsheets/d/1EtwJpEyAn9ZlPv-gELqn50U_D3tMSkXWQNRQMtv6gt8/edit?usp=sharing) - Calibration Sheet
+- [Weights](https://docs.google.com/spreadsheets/d/1LD7siKDAqdbW3s5xiHolHSPbvs9Bm2f5CtXE4-_vOGU/edit?usp=sharing)  Weights Sheet
+- [Orders](https://docs.google.com/spreadsheets/d/1J2juouLUThh_V9QpyJOPDvZeqNdCDYw2hWUnasol1D0/edit?usp=sharing) - Orders Sheet
 ## ⛏️ Built Using <a name = "built_using"></a>
 
 - [Arduino](https://www.arduino.cc/) - IDE

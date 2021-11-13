@@ -8,20 +8,23 @@ uint8_t mqttStatus()
 
 //broker used: broker.hivemq.com
 const char *ordersTopic = "pickcounter/orders"; //send anything to this topic and it will reset the MDB bus
+const char *weightsTopic = "pickcounter/weights";
 int orderReceived = 0;
-String orderValues[2] = {"", "", ""};
+String orderValues[3] = {"", "", ""};
 String calibTopic = "";
 String DevID = "";
-String calibValue="";
+String calibValue = "";
 void setMACID(String MAC)
 {
     DevID = MAC;
 }
 
-void setCalibrationValue(String v){
-    calibValue=v;
+void setCalibrationValue(String v)
+{
+    calibValue = v;
 }
-int getCalibrationValue(){
+int getCalibrationValue()
+{
     return calibValue.toInt();
 }
 uint8_t NewOrderReceived()
@@ -65,20 +68,23 @@ void callback(char *topic, byte *payload, unsigned int length)
         // Serial.println(LEDColor);
         // Serial.print("Value=");
         // Serial.println(Value);
-        if (mID == DevID)
-        {
-            orderReceived = 1;
-            orderValues[0] = ordNumber;
-            orderValues[1] = productN;
-            orderValues[2] = amount;
-        }
-        else
-        {
-            orderReceived = 2;
-        }
+
+        orderReceived = 1;
+        orderValues[0] = ordNumber;
+        orderValues[1] = productN;
+        orderValues[2] = amount;
     }
-    else if(Steing(topic)==String(calibTopic)){
+    else if (String(topic) == String(calibTopic))
+    {
         Serial.println("Calibration Data Received");
+        setCalibrationValue(payloadV);
+        Serial.print("Calibration Value set: ");
+        Serial.println(getCalibrationValue());
+    }
+
+    else if (String(topic) == String(weightsTopic))
+    {
+        Serial.println("Weights Data Received");
         setCalibrationValue(payloadV);
         Serial.print("Calibration Value set: ");
         Serial.println(getCalibrationValue());
@@ -121,8 +127,10 @@ void reconnect()
             // ... and resubscribe
             client.subscribe(ordersTopic);
             calibTopic = String("pickcounter/calib/") + DevID;
-            Serial.print("Calibration Topic: ", calibToic);
-            client.subscribe(calibTopic);
+            Serial.print("Calibration Topic: ");
+            Serial.println(calibTopic);
+            client.subscribe(calibTopic.c_str());
+            client.subscribe(weightsTopic);
         }
         else
         {

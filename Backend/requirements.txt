@@ -17,8 +17,6 @@ packaging
 paho-mqtt
 pandas
 pep517
-phantomjs
-Pillow
 ply
 progress
 pycparser

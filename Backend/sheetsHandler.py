@@ -49,15 +49,6 @@ def getCalibrationData():
         print(g[1][0])  # esp1
         for i in range(1, len(g)-1):
             mqtt_client.publish('pickcounter/calib/'+g[i][0], g[i][1])
-
-        # sheet.update_cell(2, 1, timestampStr)
-        # sheet.update_cell(2, 2, v1)
-        # sheet.update_cell(2, 3, v2)
-        # sheet.update_cell(2, 4, v3)
-        # sheet.update_cell(2, 5, v4)
-        # sheet.update_cell(2, 6, v5)
-        # report_line = [timestampStr, v1,v2,v3,v4,v5]
-        # sheet.append_row(report_line)
     except Exception as e:
 
         print('something bad happened: ', e)
@@ -89,6 +80,12 @@ def getProductWeights():
         g = sheet.get_all_values()
         print(len((g)))
         print(g[1][0])  # esp1
+        
+        weightsData=''
+        for i in range(1, len(g)-1):
+            weightsData=weightsData+g[i][0]+','+g[i][1]+';'
+        weightsData=weightsData[:-1]
+        mqtt_client.publish('pickcounter/weights', weightsData)
 
     except Exception as e:
 
