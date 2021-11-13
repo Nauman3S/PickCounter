@@ -11,6 +11,7 @@ msgV = ""
 topicV = ""
 sendNextOrder=1
 ordersIndex=1
+deleteCompleted=0
 
 clientID_prefix = ""
 for i in range(0, 6):
@@ -95,7 +96,7 @@ def getProductWeights():
 
 
 def getOrders():
-    global mqtt_client, ordersIndex, sendNextOrder
+    global mqtt_client, ordersIndex, sendNextOrder, deleteCompleted
     try:
         # use creds to create a client to interact with the Google Drive API
         scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -119,15 +120,21 @@ def getOrders():
 
         g = sheet.get_all_values()
         print(len((g)))
-        # print(g[1][0])  # esp1
+        print(g[1][0])  # esp1
+        print(g[1][1])  # esp1
+        print(g[1][2])  # esp1
         if(sendNextOrder==1):
-            if(len(g)>ordersIndex):
+            if(ordersIndex>len(g)):
                 ordersIndex=0
             if(len(g)>1):
                 orderStr=g[ordersIndex][0]+','+g[ordersIndex][1]+','+g[ordersIndex][2]
                 mqtt_client.publish('pickcounter/orders',orderStr)
                 sendNextOrder=0
                 ordersIndex=ordersIndex+1
+            if(deleteCompleted==1):
+                if(len(g)>=1):
+                    sheet.delete_rows(ordersIndex-1)
+                deleteCompleted=0
         
 
     except Exception as e:
@@ -145,7 +152,7 @@ def on_connect(client, userdata, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 
-    global msgV, topicV
+    global msgV, topicV, sendNextOrder, deleteCompleted
     print(msg.topic+" "+str(msg.payload))
     topicV = str(msg.topic)
     msgV = str((msg.payload).decode('utf-8'))
@@ -153,6 +160,7 @@ def on_message(client, userdata, msg):
         print('Order Status Response from ESP32', msgV)
         if('Completed' in msgV):
             sendNextOrder=1
+            deleteCompleted=1
 
 
 mqtt_client.on_message = on_message

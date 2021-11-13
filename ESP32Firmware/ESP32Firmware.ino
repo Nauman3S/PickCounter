@@ -80,7 +80,7 @@ void loop()
 
     if (NewOrderReceived() == 1)
     {   Serial.println("New Order Received.");
-        Serial.print("LEDColor,Value = ");
+        Serial.print("Order Number, Product, Amount = ");
         Serial.println(getOrderValues());
         processOrderAndSendResponse(0);//0=completed, 1=timeout, 2=failed
     }

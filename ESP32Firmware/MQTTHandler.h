@@ -9,7 +9,7 @@ uint8_t mqttStatus()
 //broker used: broker.hivemq.com
 const char *ordersTopic = "pickcounter/orders"; //send anything to this topic and it will reset the MDB bus
 int orderReceived = 0;
-String orderValues[2] = {"", ""};
+String orderValues[2] = {"", "", ""};
 String calibTopic = "";
 String DevID = "";
 String calibValue="";
@@ -42,7 +42,7 @@ uint8_t NewOrderReceived()
 String getOrderValues()
 {
     orderReceived = 0;
-    return (orderValues[0] + String(",") + orderValues[1]);
+    return (orderValues[0] + String(",") + orderValues[1] + String(",") + orderValues[2]);
 }
 void callback(char *topic, byte *payload, unsigned int length)
 {
@@ -58,9 +58,9 @@ void callback(char *topic, byte *payload, unsigned int length)
     Serial.println();
     if (String(topic) == String(ordersTopic))
     {
-        String LEDColor = StringSeparator(payloadV, ',', 0);
-        String Value = StringSeparator(payloadV, ',', 1);
-        String mID = StringSeparator(payloadV, ',', 2);
+        String ordNumber = StringSeparator(payloadV, ',', 0);
+        String productN = StringSeparator(payloadV, ',', 1);
+        String amount = StringSeparator(payloadV, ',', 2);
         // Serial.print("LEDColor=");
         // Serial.println(LEDColor);
         // Serial.print("Value=");
@@ -68,8 +68,9 @@ void callback(char *topic, byte *payload, unsigned int length)
         if (mID == DevID)
         {
             orderReceived = 1;
-            orderValues[0] = LEDColor;
-            orderValues[1] = Value;
+            orderValues[0] = ordNumber;
+            orderValues[1] = productN;
+            orderValues[2] = amount;
         }
         else
         {
