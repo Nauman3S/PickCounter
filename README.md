@@ -84,11 +84,11 @@ You should have Arduino IDE Installed
 ## 🎈 PythonScript Configuration <a name="pythonscript"></a>
 
 1.  Download and install Python3 from official website: https://www.python.org/downloads/
-2.  Go in the PythonScript folder and open the terminal
+2.  Go in the Backend folder and open the terminal
 3.  Execute ```pip3 install -r requirements.txt```
 ### Running Python Script
 
-- Run the python script using ```python3 Script.py```
+- Run the python script using ```python3 sheetsHandler.py```
 - The script will start running. You can add orders to the Spreadsheet and they will be instantly dispached to the ESP32 devices. Once the ESP32 completes an order, it will be removed form the sheet and the next order will be sent.
 
 ## ⛏️ Googlesheets <a name = "gs"></a>

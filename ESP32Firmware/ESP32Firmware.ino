@@ -83,6 +83,7 @@ void loop()
         Serial.print("Order Number, Product, Amount = ");
         Serial.println(getOrderValues());
         processOrderAndSendResponse(0);//0=completed, 1=timeout, 2=failed
+        Serial.println("Order processed and completed");
     }
     else if(NewOrderReceived() == 2){
        Serial.println("Wrong Device ID");
