@@ -10,9 +10,19 @@ uint8_t mqttStatus()
 const char *ordersTopic = "pickcounter/orders"; //send anything to this topic and it will reset the MDB bus
 int orderReceived = 0;
 String orderValues[2] = {"", ""};
-String DevID="";
-void setMACID(String MAC){
-    DevID=MAC;
+String calibTopic = "";
+String DevID = "";
+String calibValue="";
+void setMACID(String MAC)
+{
+    DevID = MAC;
+}
+
+void setCalibrationValue(String v){
+    calibValue=v;
+}
+int getCalibrationValue(){
+    return calibValue.toInt();
 }
 uint8_t NewOrderReceived()
 {
@@ -20,11 +30,12 @@ uint8_t NewOrderReceived()
     {
         return 1;
     }
-    else if(orderReceived==2)
+    else if (orderReceived == 2)
     {
         return 2;
     }
-    else{
+    else
+    {
         return 0;
     }
 }
@@ -49,19 +60,27 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         String LEDColor = StringSeparator(payloadV, ',', 0);
         String Value = StringSeparator(payloadV, ',', 1);
-        String mID=StringSeparator(payloadV, ',', 2);
+        String mID = StringSeparator(payloadV, ',', 2);
         // Serial.print("LEDColor=");
         // Serial.println(LEDColor);
         // Serial.print("Value=");
         // Serial.println(Value);
-        if(mID==DevID){
-        orderReceived = 1;
-        orderValues[0] = LEDColor;
-        orderValues[1] = Value;
+        if (mID == DevID)
+        {
+            orderReceived = 1;
+            orderValues[0] = LEDColor;
+            orderValues[1] = Value;
         }
-        else{
-            orderReceived=2;
+        else
+        {
+            orderReceived = 2;
         }
+    }
+    else if(Steing(topic)==String(calibTopic)){
+        Serial.println("Calibration Data Received");
+        setCalibrationValue(payloadV);
+        Serial.print("Calibration Value set: ");
+        Serial.println(getCalibrationValue());
     }
 
     // Switch on the LED if an 1 was received as first character
@@ -89,10 +108,10 @@ void reconnect()
     {
         Serial.print("Attempting MQTT connection...");
         // Create a random client ID
-        String clientId = "ESP8266Client-";
+        String clientId = "ESP32Client-";
         clientId += String(random(0xffff), HEX);
         // Attempt to connect
-        if (client.connect(clientId.c_str(),"bbniqtdq","D87AAz6nsCdN"))
+        if (client.connect(clientId.c_str(), "bbniqtdq", "D87AAz6nsCdN"))
         {
             Serial.println("connected");
 
@@ -100,6 +119,9 @@ void reconnect()
 
             // ... and resubscribe
             client.subscribe(ordersTopic);
+            calibTopic = String("pickcounter/calib/") + DevID;
+            Serial.print("Calibration Topic: ", calibToic);
+            client.subscribe(calibTopic);
         }
         else
         {

@@ -11,32 +11,6 @@ import paho.mqtt.client as mqtt
 msgV=""
 topicV=""
 
-# def postReq(server,header,jsonV,userPass):
-#     final_dictionary = json.loads(jsonV)
-#     print(final_dictionary)
-#     h=header.split(':')
-#     h1=h[0]
-#     h2=h[1].strip()
-#     #['http://44.195.192.158:3000/v1/jobOperations', 'Content-Type: application/x-www-form-urlencoded', '{\n"Tracker_ID__c":"240AC4AFD0D0C0",\n"Tracker_DateTime__c":"2021-8-30T0:41:5.531"\n}']
-#     req = request.Request(server, method="POST")
-#     req.add_header(h1, h2)
-#     data = final_dictionary
-#     data = json.dumps(jsonV)
-#     data = data.encode()
-#     userPassV=userPass.split(',')
-#     print(userPassV)
-#     try:
-#         base64string = base64.b64encode((userPassV[0] + ":" + userPassV[1]).encode("ascii"))
-#         request.add_header("Authorization", "Basic {}".format(base64string.decode("ascii")))
-#         r = request.urlopen(req, data=data)
-#         content = r.read()
-#         decodedC=content.decode()
-#         print(decodedC)
-#         jj=json.loads(decodedC)
-#         print(jj['status'])
-#         return jj['status']
-#     except Exception as e:
-#         return 400
 def on_connect(client, userdata, rc):
     #print("Connected with result code "+str(rc))
     # Subscribing in on_connect() means that if we lose the connection and
