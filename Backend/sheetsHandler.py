@@ -40,14 +40,14 @@ def getCalibrationData():
 
         # Extract and print all of the values
         list_of_hashes = sheet.get_all_records()
-        print(list_of_hashes)
+        # print(list_of_hashes)
 
         dateTimeObj = datetime.now()
         timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
 
         g = sheet.get_all_values()
-        print(len((g)))
-        print(g[1][0])  # esp1
+        # print(len((g)))
+        # print(g[1][0])  # esp1
         for i in range(1, len(g)):
             
             print('Sending to: ','pickcounter/calib/'+g[i][0], '  vaule:',g[i][1])
@@ -75,19 +75,20 @@ def getProductWeights():
 
         # Extract and print all of the values
         list_of_hashes = sheet.get_all_records()
-        print(list_of_hashes)
+        # print(list_of_hashes)
 
         dateTimeObj = datetime.now()
         timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
 
         g = sheet.get_all_values()
-        print(len((g)))
-        print(g[1][0])  # esp1
+        # print(len((g)))
+        # print(g[1][0])  # esp1
         
         weightsData=''
-        for i in range(1, len(g)-1):
-            weightsData=weightsData+g[i][0]+','+g[i][1]+';'
+        for i in range(1, len(g)):
+            weightsData=weightsData+g[i][1]+','
         weightsData=weightsData[:-1]
+            
         mqtt_client.publish('pickcounter/weights', weightsData)
 
     except Exception as e:
@@ -114,16 +115,16 @@ def getOrders():
 
         # Extract and print all of the values
         list_of_hashes = sheet.get_all_records()
-        print(list_of_hashes)
+        # print(list_of_hashes)
 
         dateTimeObj = datetime.now()
         timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
 
         g = sheet.get_all_values()
-        print(len((g)))
-        print(g[1][0])  # esp1
-        print(g[1][1])  # esp1
-        print(g[1][2])  # esp1
+        # print(len((g)))
+        # print(g[1][0])  # esp1
+        # print(g[1][1])  # esp1
+        # print(g[1][2])  # esp1
         if(sendNextOrder==1):
             if(ordersIndex>len(g)):
                 ordersIndex=0
@@ -134,14 +135,19 @@ def getOrders():
                 sendNextOrder=0
                 
             if(updatePrevOrderStatus==1):
+                updatePrevOrderStatus=0
                 if(len(g)>1):
                     # sheet.delete_rows(ordersIndex-1)
                     sheet.update_cell(ordersIndex+1, 4, orderStatus)
                     sheet.update_cell(ordersIndex+1, 5, orderAmtReceived)
                     ordersIndex=ordersIndex+1
+            else:
+                orderStr=g[ordersIndex][0]+','+g[ordersIndex][1]+','+g[ordersIndex][2]
+                mqtt_client.publish('pickcounter/orders',orderStr)
+                print('Order_Sent: ',orderStr)
+
                     
-                    
-                updatePrevOrderStatus=0
+            
         
 
     except Exception as e:
@@ -181,7 +187,7 @@ def on_message(client, userdata, msg):
             updatePrevOrderStatus=1
     if(topicV == 'pickcounter/getWCdata'):
         getCalibrationData()
-        # time.sleep(1)
+        time.sleep(0.5)
         getProductWeights()
 
 
@@ -201,10 +207,11 @@ devID = ""
 while 1:
     
     getOrders()
+    mqtt_client.publish('pickcounter/temp/temp','temp')
     # devID=input("Enter Device ID: ")
     # ledColor=input("Enter LED Color to send: ")
     # valueV=input("Enter Value to send: ")
     # client.publish('pickcounter/orders',str(ledColor)+','+str(valueV)+','+str(devID))
     # print("Order Sent!")
     
-    time.sleep(3)
+    time.sleep(4)

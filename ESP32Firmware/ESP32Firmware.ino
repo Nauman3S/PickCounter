@@ -11,7 +11,7 @@ String MAC = "";
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE (50)
+#define MSG_BUFFER_SIZE (512)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 uint8_t WCAvailable = 0; //weight calibration data
@@ -65,9 +65,10 @@ void setup()
 
     Serial.println(getMacAddress());
     setMACID(getMacAddress());
-
+    client.setBufferSize(1024);
+    client.setKeepAlive(30);
     client.setServer(mqtt_server, 1883);
-    client.setBufferSize(512);
+
     client.setCallback(callback);
     // delay(3000);
     // publishValues("pickcounter/getWCdata","getData");
@@ -106,8 +107,7 @@ void loop()
         if (WCAvailable == 0)
         {
             WCAvailable = 1;
-            publishValues(String("pickcounter/getWCdata"),String("getData"));
-
+            publishValues(String("pickcounter/getWCdata"), String("getData"));
         }
         lastMsg = now;
 

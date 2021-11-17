@@ -9,8 +9,9 @@ uint8_t mqttStatus()
 //broker used: broker.hivemq.com
 const char *ordersTopic = "pickcounter/orders"; //send anything to this topic and it will reset the MDB bus
 const char *weightsTopic = "pickcounter/weights";
+const char *temp = "pickcounter/temp/temp";
 int orderReceived = 0;
-String orderValues[3] = {"", "", ""};
+String orderValues[4] = {"", "", ""};
 String calibTopic = "";
 String DevID = "";
 String calibValue = "";
@@ -96,8 +97,11 @@ void callback(char *topic, byte *payload, unsigned int length)
     else if (String(topic) == String(weightsTopic))
     {
         Serial.println("Weights Data Received");
-        setWeightValue(payloadV);
+        String wV = getWeightValue();
+
         Serial.print("Weight Value set: ");
+
+        setWeightValue(payloadV);
         Serial.println(getWeightValue());
     }
 
@@ -142,6 +146,7 @@ void reconnect()
             Serial.println(calibTopic);
             client.subscribe(calibTopic.c_str());
             client.subscribe(weightsTopic);
+            client.subscribe(temp);
         }
         else
         {
