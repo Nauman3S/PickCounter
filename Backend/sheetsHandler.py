@@ -13,6 +13,7 @@ topicV = ""
 sendNextOrder=1
 ordersIndex=1
 updatePrevOrderStatus=0
+idReceived="1"
 
 clientID_prefix = ""
 for i in range(0, 6):
@@ -98,7 +99,7 @@ def getProductWeights():
 orderStatus=""
 orderAmtReceived=""
 def getOrders():
-    global mqtt_client, ordersIndex, sendNextOrder, updatePrevOrderStatus,orderStatus,orderAmtReceived
+    global mqtt_client, ordersIndex, sendNextOrder, updatePrevOrderStatus,orderStatus,orderAmtReceived,idReceived
     try:
         # use creds to create a client to interact with the Google Drive API
         scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -122,17 +123,20 @@ def getOrders():
 
         g = sheet.get_all_values()
         # print(len((g)))
+        print(idReceived)
+        idV=int(idReceived)
+        idV=idV+1
         # print(g[1][0])  # esp1
         # print(g[1][1])  # esp1
         # print(g[1][2])  # esp1
-        if(sendNextOrder==1):
+        if(1==1):
             if(ordersIndex>len(g)):
                 ordersIndex=0
             if(len(g)>1):
                 orderStr=g[ordersIndex][0]+','+g[ordersIndex][1]+','+g[ordersIndex][2]
                 mqtt_client.publish('pickcounter/orders',orderStr)
                 sheet.update_cell(ordersIndex+1, 4, 'Order sent')
-                sendNextOrder=0
+                # sendNextOrder=0
                 
             if(updatePrevOrderStatus==1):
                 updatePrevOrderStatus=0
@@ -166,7 +170,7 @@ def on_connect(client, userdata, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 
-    global msgV, topicV, sendNextOrder, updatePrevOrderStatus,orderStatus, orderAmtReceived
+    global msgV, topicV, sendNextOrder, updatePrevOrderStatus,orderStatus, orderAmtReceived, idReceived
     print(msg.topic+" "+str(msg.payload))
     topicV = str(msg.topic)
     msgV = str((msg.payload).decode('utf-8'))
@@ -174,13 +178,19 @@ def on_message(client, userdata, msg):
         print('Order Status Response from ESP32', msgV)
         jsonMsgV=json.loads(msgV)
         print(jsonMsgV['Status'])
+        idReceived=jsonMsgV['id']
         if('Completed' in msgV):
             sendNextOrder=1
             updatePrevOrderStatus=1
             orderStatus='Order '+jsonMsgV['Status']
             orderAmtReceived=jsonMsgV['Amount']
             
-        elif('Failed'):
+        elif('Failed' in msgV):
+            orderStatus='Order '+jsonMsgV['Status']
+            orderAmtReceived=jsonMsgV['Amount']
+            sendNextOrder=1
+            updatePrevOrderStatus=1
+        elif('Timeout' in msgV):
             orderStatus='Order '+jsonMsgV['Status']
             orderAmtReceived=jsonMsgV['Amount']
             sendNextOrder=1

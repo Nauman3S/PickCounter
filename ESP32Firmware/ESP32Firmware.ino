@@ -43,12 +43,13 @@ void setup_wifi()
     Serial.println(WiFi.localIP());
 }
 
-void processOrderAndSendResponse(uint8_t n, String amt)
+void processOrderAndSendResponse(uint8_t n, String amt, String id)
 {
 
     //process the order here
     String orderStatus[3] = {"Completed", "Timeout", "Failed"};
     String responseJSON = String("{\"Status\":\"" + orderStatus[n]) + String("\",\"Amount\":\"") + String(amt);
+    responseJSON += String("\",\"id\":\"") + String(id);
     responseJSON += String("\"}");
     publishValues("pickcounter/orderstatus", responseJSON);
 }
@@ -90,15 +91,25 @@ void loop()
         String orderValues = getOrderValues();
         Serial.println(orderValues);
         String amt = StringSeparator(orderValues, ',', 2);
-        processOrderAndSendResponse(0, amt); //0=completed, 1=timeout, 2=failed
+        String ordID = StringSeparator(orderValues, ',', 0);
+        if (orderValues.indexOf("timeoutTestProduct") >= 0)
+        {
+            processOrderAndSendResponse(1, "0", ordID); //0=completed, 1=timeout, 2=failed
+        }
+        if (orderValues.indexOf("failedTestProduct") >= 0)
+        {
+            processOrderAndSendResponse(2, "0", ordID); //0=completed, 1=timeout, 2=failed
+        }
+        processOrderAndSendResponse(0, amt, ordID); //0=completed, 1=timeout, 2=failed
         Serial.println("Order processed and completed");
     }
     else if (NewOrderReceived() == 2)
     {
         Serial.println("Wrong Device ID");
         String orderValues = getOrderValues();
+        String ordID = StringSeparator(orderValues, ',', 0);
 
-        processOrderAndSendResponse(2, "0");
+        processOrderAndSendResponse(2, "0", ordID);
     }
 
     unsigned long now = millis();
