@@ -14,6 +14,7 @@ unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (50)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
+uint8_t WCAvailable = 0; //weight calibration data
 #include "MQTTHandler.h"
 
 void setup_wifi()
@@ -42,12 +43,13 @@ void setup_wifi()
     Serial.println(WiFi.localIP());
 }
 
-void processOrderAndSendResponse(uint8_t n)
+void processOrderAndSendResponse(uint8_t n, String amt)
 {
 
     //process the order here
     String orderStatus[3] = {"Completed", "Timeout", "Failed"};
-    String responseJSON = "{\"Status\":\"" + orderStatus[n] + String("\"}");
+    String responseJSON = String("{\"Status\":\"" + orderStatus[n]) + String("\",\"Amount\":\"") + String(amt);
+    responseJSON += String("\"}");
     publishValues("pickcounter/orderstatus", responseJSON);
 }
 
@@ -55,18 +57,20 @@ void setup()
 {
     Serial.begin(115200);
     pinMode(BUILTIN_LED, OUTPUT); // Initialize the BUILTIN_LED pin as an output
-    
+
     setup_wifi();
 
     Serial.print("Device ID: ");
     //MAC = String(WiFi.macAddress());
-    
+
     Serial.println(getMacAddress());
     setMACID(getMacAddress());
-    
-    
+
     client.setServer(mqtt_server, 1883);
+    client.setBufferSize(512);
     client.setCallback(callback);
+    // delay(3000);
+    // publishValues("pickcounter/getWCdata","getData");
 }
 
 void loop()
@@ -79,21 +83,32 @@ void loop()
     client.loop();
 
     if (NewOrderReceived() == 1)
-    {   Serial.println("New Order Received.");
+    {
+        Serial.println("New Order Received.");
         Serial.print("Order Number, Product, Amount = ");
-        Serial.println(getOrderValues());
-        processOrderAndSendResponse(0);//0=completed, 1=timeout, 2=failed
+        String orderValues = getOrderValues();
+        Serial.println(orderValues);
+        String amt = StringSeparator(orderValues, ',', 2);
+        processOrderAndSendResponse(0, amt); //0=completed, 1=timeout, 2=failed
         Serial.println("Order processed and completed");
     }
-    else if(NewOrderReceived() == 2){
-       Serial.println("Wrong Device ID");
-       getOrderValues();//failed, wrong mac
-       processOrderAndSendResponse(2);
+    else if (NewOrderReceived() == 2)
+    {
+        Serial.println("Wrong Device ID");
+        String orderValues = getOrderValues();
+
+        processOrderAndSendResponse(2, "0");
     }
 
     unsigned long now = millis();
-    if (now - lastMsg > 2000)
+    if (now - lastMsg > 4000)
     { //data update frequency == 2000mSec or 2sec
+        if (WCAvailable == 0)
+        {
+            WCAvailable = 1;
+            publishValues(String("pickcounter/getWCdata"),String("getData"));
+
+        }
         lastMsg = now;
 
         // put normal processing code here

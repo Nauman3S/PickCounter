@@ -5,13 +5,14 @@ import json
 import base64
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
+import json
 import paho.mqtt.client as mqtt
 
 msgV = ""
 topicV = ""
 sendNextOrder=1
 ordersIndex=1
-deleteCompleted=0
+updatePrevOrderStatus=0
 
 clientID_prefix = ""
 for i in range(0, 6):
@@ -47,7 +48,9 @@ def getCalibrationData():
         g = sheet.get_all_values()
         print(len((g)))
         print(g[1][0])  # esp1
-        for i in range(1, len(g)-1):
+        for i in range(1, len(g)):
+            
+            print('Sending to: ','pickcounter/calib/'+g[i][0], '  vaule:',g[i][1])
             mqtt_client.publish('pickcounter/calib/'+g[i][0], g[i][1])
     except Exception as e:
 
@@ -91,9 +94,10 @@ def getProductWeights():
 
         print('something bad happened: ', e)
 
-
+orderStatus=""
+orderAmtReceived=""
 def getOrders():
-    global mqtt_client, ordersIndex, sendNextOrder, deleteCompleted
+    global mqtt_client, ordersIndex, sendNextOrder, updatePrevOrderStatus,orderStatus,orderAmtReceived
     try:
         # use creds to create a client to interact with the Google Drive API
         scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -126,12 +130,18 @@ def getOrders():
             if(len(g)>1):
                 orderStr=g[ordersIndex][0]+','+g[ordersIndex][1]+','+g[ordersIndex][2]
                 mqtt_client.publish('pickcounter/orders',orderStr)
+                sheet.update_cell(ordersIndex+1, 4, 'Order sent')
                 sendNextOrder=0
-                ordersIndex=ordersIndex+1
-            if(deleteCompleted==1):
-                if(len(g)>=1):
-                    sheet.delete_rows(ordersIndex-1)
-                deleteCompleted=0
+                
+            if(updatePrevOrderStatus==1):
+                if(len(g)>1):
+                    # sheet.delete_rows(ordersIndex-1)
+                    sheet.update_cell(ordersIndex+1, 4, orderStatus)
+                    sheet.update_cell(ordersIndex+1, 5, orderAmtReceived)
+                    ordersIndex=ordersIndex+1
+                    
+                    
+                updatePrevOrderStatus=0
         
 
     except Exception as e:
@@ -144,20 +154,36 @@ def on_connect(client, userdata, rc):
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
     client.subscribe("pickcounter/orderstatus")
+    client.subscribe("pickcounter/getWCdata")
 
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 
-    global msgV, topicV, sendNextOrder, deleteCompleted
+    global msgV, topicV, sendNextOrder, updatePrevOrderStatus,orderStatus, orderAmtReceived
     print(msg.topic+" "+str(msg.payload))
     topicV = str(msg.topic)
     msgV = str((msg.payload).decode('utf-8'))
     if(topicV == 'pickcounter/orderstatus'):
         print('Order Status Response from ESP32', msgV)
+        jsonMsgV=json.loads(msgV)
+        print(jsonMsgV['Status'])
         if('Completed' in msgV):
             sendNextOrder=1
-            deleteCompleted=1
+            updatePrevOrderStatus=1
+            orderStatus='Order '+jsonMsgV['Status']
+            orderAmtReceived=jsonMsgV['Amount']
+            
+        elif('Failed'):
+            orderStatus='Order '+jsonMsgV['Status']
+            orderAmtReceived=jsonMsgV['Amount']
+            sendNextOrder=1
+            updatePrevOrderStatus=1
+    if(topicV == 'pickcounter/getWCdata'):
+        getCalibrationData()
+        # time.sleep(1)
+        getProductWeights()
+
 
 
 mqtt_client.on_message = on_message
@@ -165,6 +191,7 @@ mqtt_client.on_message = on_message
 mqtt_client.username_pw_set('bbniqtdq', 'D87AAz6nsCdN')
 mqtt_client.connect("smart-pilot.cloudmqtt.com", 1883, 60)
 mqtt_client.subscribe("pickcounter/orderstatus")
+mqtt_client.subscribe("pickcounter/getWCdata")
 
 
 mqtt_client.loop_start()
@@ -172,8 +199,7 @@ mqtt_client.loop_start()
 devID = ""
 
 while 1:
-    getCalibrationData()
-    getProductWeights()
+    
     getOrders()
     # devID=input("Enter Device ID: ")
     # ledColor=input("Enter LED Color to send: ")

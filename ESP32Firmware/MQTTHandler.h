@@ -14,6 +14,7 @@ String orderValues[3] = {"", "", ""};
 String calibTopic = "";
 String DevID = "";
 String calibValue = "";
+String weiValue = "";
 void setMACID(String MAC)
 {
     DevID = MAC;
@@ -26,6 +27,15 @@ void setCalibrationValue(String v)
 int getCalibrationValue()
 {
     return calibValue.toInt();
+}
+
+void setWeightValue(String v)
+{
+    weiValue = v;
+}
+String getWeightValue()
+{
+    return weiValue;
 }
 uint8_t NewOrderReceived()
 {
@@ -49,15 +59,16 @@ String getOrderValues()
 }
 void callback(char *topic, byte *payload, unsigned int length)
 {
-    // Serial.print("Message arrived [");
-    // Serial.print(topic);
-    // Serial.print("] ");
+    Serial.print("Message arrived [");
+    Serial.print(topic);
+    Serial.print("] ");
     String payloadV = "";
     for (int i = 0; i < length; i++)
     {
         // Serial.print((char)payload[i]);
         payloadV = payloadV + String((char)payload[i]);
     }
+    Serial.println(payloadV);
     Serial.println();
     if (String(topic) == String(ordersTopic))
     {
@@ -85,9 +96,9 @@ void callback(char *topic, byte *payload, unsigned int length)
     else if (String(topic) == String(weightsTopic))
     {
         Serial.println("Weights Data Received");
-        setCalibrationValue(payloadV);
-        Serial.print("Calibration Value set: ");
-        Serial.println(getCalibrationValue());
+        setWeightValue(payloadV);
+        Serial.print("Weight Value set: ");
+        Serial.println(getWeightValue());
     }
 
     // Switch on the LED if an 1 was received as first character
